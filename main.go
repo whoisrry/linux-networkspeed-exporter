@@ -26,8 +26,8 @@ const (
 )
 
 var (
-	allowedIPs = flag.String("allowed-ips", "", "Comma-separated list of allowed IP addresses")
-	port       = flag.String("port", "8080", "Port to listen on")
+	allowedIPs = flag.String("allowed-ips", os.Getenv("ALLOWED_IPS"), "Comma-separated list of allowed IP addresses")
+	port       = flag.String("port", os.Getenv("PORT"), "Port to listen on")
 
 	networkSpeedBits = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -297,7 +297,7 @@ func main() {
 	// Expose the registered metrics via HTTP with IP whitelist
 	http.Handle("/metrics", http.HandlerFunc(metricsHandler))
 
-	log.Printf("Starting server on :%s with IP whitelist: %s", *port, *allowedIPs)
+	log.Printf("Starting server on :%v with IP whitelist: %v", *port, *allowedIPs)
 	if err := http.ListenAndServe(":"+*port, nil); err != nil {
 		log.Fatal(err)
 	}

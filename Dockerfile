@@ -26,4 +26,5 @@ EXPOSE 8080
 ENV ALLOWED_IPS=""
 ENV PORT="8080"
 
-ENTRYPOINT ["./vyosexporter", "--allowed-ips=${ALLOWED_IPS}", "--port=${PORT}"] 
+# Use shell form to allow environment variable expansion
+ENTRYPOINT ./vyosexporter --allowed-ips=$ALLOWED_IPS --port=$PORT 

@@ -66,13 +66,19 @@ http://localhost:8080/metrics
 
 ## Configuration Options
 
-### Command Line Arguments
-- `--allowed-ips`: Comma-separated list of allowed IP addresses (default: "", allows all)
-- `--port`: Port to listen on (default: "8080")
+### Configuration Priority
+The application uses the following priority order for configuration:
+1. Command line arguments (highest priority)
+2. Environment variables
+3. Default values (lowest priority)
 
 ### Environment Variables
 - `ALLOWED_IPS`: Comma-separated list of allowed IP addresses (default: "", allows all)
 - `PORT`: Port to listen on (default: "8080")
+
+### Command Line Arguments (overrides environment variables)
+- `--allowed-ips`: Comma-separated list of allowed IP addresses
+- `--port`: Port to listen on
 
 ## Metrics
 
