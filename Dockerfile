@@ -26,5 +26,10 @@ EXPOSE 8080
 ENV ALLOWED_IPS=""
 ENV PORT="8080"
 
-# Use shell form to allow environment variable expansion
-ENTRYPOINT ./vyosexporter --allowed-ips=$ALLOWED_IPS --port=$PORT 
+# Create entrypoint script
+RUN echo '#!/bin/sh\n\
+exec ./vyosexporter --allowed-ips="$ALLOWED_IPS" --port="$PORT"' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+# Use JSON format with entrypoint script
+ENTRYPOINT ["/app/entrypoint.sh"] 
