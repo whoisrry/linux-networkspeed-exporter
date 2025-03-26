@@ -13,6 +13,11 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/vyosexporter .
 
+# Create entrypoint script
+RUN echo '#!/bin/sh\n\
+exec ./vyosexporter --allowed-ips="$ALLOWED_IPS" --port="$PORT"' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
 # Add non root user and create necessary directories
 RUN adduser -D -g '' appuser && \
     mkdir -p /proc/net && \
@@ -25,11 +30,6 @@ EXPOSE 8080
 # Use environment variables with defaults
 ENV ALLOWED_IPS=""
 ENV PORT="8080"
-
-# Create entrypoint script
-RUN echo '#!/bin/sh\n\
-exec ./vyosexporter --allowed-ips="$ALLOWED_IPS" --port="$PORT"' > /app/entrypoint.sh && \
-    chmod +x /app/entrypoint.sh
 
 # Use JSON format with entrypoint script
 ENTRYPOINT ["/app/entrypoint.sh"] 
