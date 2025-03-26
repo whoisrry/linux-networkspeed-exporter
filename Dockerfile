@@ -13,9 +13,17 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/vyosexporter .
 
-# Add non root user
-RUN adduser -D -g '' appuser
+# Add non root user and create necessary directories
+RUN adduser -D -g '' appuser && \
+    mkdir -p /proc/net && \
+    chown -R appuser:appuser /app
+
 USER appuser
 
 EXPOSE 8080
-CMD ["./vyosexporter"] 
+
+# Use environment variables with defaults
+ENV ALLOWED_IPS=""
+ENV PORT="8080"
+
+ENTRYPOINT ["./vyosexporter", "--allowed-ips=${ALLOWED_IPS}", "--port=${PORT}"] 

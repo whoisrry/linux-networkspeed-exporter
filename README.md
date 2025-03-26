@@ -10,6 +10,8 @@ A Prometheus exporter that collects network interface speeds and statistics ever
 - Skips loopback and down interfaces
 - Collects both receive and transmit statistics
 - Tracks errors, drops, and packet counts
+- IP whitelist support for secure access
+- Environment variable configuration support
 
 ## Installation
 
@@ -18,12 +20,17 @@ A Prometheus exporter that collects network interface speeds and statistics ever
 # Build the image
 docker build -t vyosexporter .
 
-# Run the container
+# Run the container with environment variables
 docker run -d \
   --name vyosexporter \
   --network host \
   -p 8080:8080 \
+  -e ALLOWED_IPS="192.168.1.100,10.0.0.50" \
+  -e PORT=8080 \
   vyosexporter
+
+# Or using docker-compose
+docker-compose up -d
 ```
 
 ### Manual Installation
@@ -39,13 +46,33 @@ docker run -d \
 
 Run the application:
 ```bash
+# Allow all IPs (default)
 ./vyosexporter
+
+# Allow specific IPs
+./vyosexporter --allowed-ips="192.168.1.100,10.0.0.50"
+
+# Change port
+./vyosexporter --port=9090
+
+# Combine options
+./vyosexporter --allowed-ips="192.168.1.100" --port=9090
 ```
 
-The exporter will start listening on port 8080. You can access the metrics at:
+The exporter will start listening on the specified port (default: 8080). You can access the metrics at:
 ```
 http://localhost:8080/metrics
 ```
+
+## Configuration Options
+
+### Command Line Arguments
+- `--allowed-ips`: Comma-separated list of allowed IP addresses (default: "", allows all)
+- `--port`: Port to listen on (default: "8080")
+
+### Environment Variables
+- `ALLOWED_IPS`: Comma-separated list of allowed IP addresses (default: "", allows all)
+- `PORT`: Port to listen on (default: "8080")
 
 ## Metrics
 

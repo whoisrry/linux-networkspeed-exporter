@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -25,6 +26,9 @@ const (
 )
 
 var (
+	allowedIPs = flag.String("allowed-ips", "", "Comma-separated list of allowed IP addresses")
+	port       = flag.String("port", "8080", "Port to listen on")
+
 	networkSpeedBits = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "network_interface_speed_bits",
@@ -255,15 +259,46 @@ func collectNetworkSpeeds() {
 	}
 }
 
+func isIPAllowed(remoteAddr string) bool {
+	if *allowedIPs == "" {
+		return true // Allow all if no whitelist specified
+	}
+
+	// Extract IP from remoteAddr (which might include port)
+	ip, _, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		ip = remoteAddr // If no port, use the whole string
+	}
+
+	allowedList := strings.Split(*allowedIPs, ",")
+	for _, allowedIP := range allowedList {
+		allowedIP = strings.TrimSpace(allowedIP)
+		if ip == allowedIP {
+			return true
+		}
+	}
+	return false
+}
+
+func metricsHandler(w http.ResponseWriter, r *http.Request) {
+	if !isIPAllowed(r.RemoteAddr) {
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+	promhttp.Handler().ServeHTTP(w, r)
+}
+
 func main() {
+	flag.Parse()
+
 	// Start collecting network speeds in a goroutine
 	go collectNetworkSpeeds()
 
-	// Expose the registered metrics via HTTP
-	http.Handle("/metrics", promhttp.Handler())
+	// Expose the registered metrics via HTTP with IP whitelist
+	http.Handle("/metrics", http.HandlerFunc(metricsHandler))
 
-	log.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	log.Printf("Starting server on :%s with IP whitelist: %s", *port, *allowedIPs)
+	if err := http.ListenAndServe(":"+*port, nil); err != nil {
 		log.Fatal(err)
 	}
 }
