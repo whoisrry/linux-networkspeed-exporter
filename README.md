@@ -13,6 +13,20 @@ A Prometheus exporter that collects network interface speeds and statistics ever
 
 ## Installation
 
+### Using Docker
+```bash
+# Build the image
+docker build -t vyosexporter .
+
+# Run the container
+docker run -d \
+  --name vyosexporter \
+  --network host \
+  -p 8080:8080 \
+  vyosexporter
+```
+
+### Manual Installation
 1. Make sure you have Go 1.21 or later installed
 2. Clone this repository
 3. Run `go mod tidy` to download dependencies
