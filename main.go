@@ -61,6 +61,14 @@ var (
 		[]string{"interface", "direction"},
 	)
 
+	networkInterfaceInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "network_interface_info",
+			Help: "Information about network interfaces",
+		},
+		[]string{"interface", "description"},
+	)
+
 	// Store previous values for speed calculation with mutex for thread safety
 	prevStats = struct {
 		sync.RWMutex
@@ -89,6 +97,7 @@ func init() {
 	prometheus.MustRegister(networkErrors)
 	prometheus.MustRegister(networkDrops)
 	prometheus.MustRegister(networkPackets)
+	prometheus.MustRegister(networkInterfaceInfo)
 }
 
 // cleanupOldInterfaces removes interfaces that haven't been seen for a while
@@ -158,6 +167,19 @@ func collectNetworkSpeeds() {
 			if err != nil || iface.Flags&net.FlagLoopback != 0 || iface.Flags&net.FlagUp == 0 {
 				continue
 			}
+
+			// Get interface description from /sys/class/net/<interface>/description
+			description := "Unknown"
+			descFile := fmt.Sprintf("/sys/class/net/%s/description", ifaceName)
+			if descBytes, err := os.ReadFile(descFile); err == nil {
+				description = strings.TrimSpace(string(descBytes))
+			}
+
+			// Update interface info metric
+			networkInterfaceInfo.With(prometheus.Labels{
+				"interface":   ifaceName,
+				"description": description,
+			}).Set(1)
 
 			// Parse receive and transmit statistics
 			var rxBytes, rxPackets, rxErrors, rxDrops uint64
