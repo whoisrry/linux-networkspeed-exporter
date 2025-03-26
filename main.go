@@ -168,9 +168,9 @@ func collectNetworkSpeeds() {
 				continue
 			}
 
-			// Get interface description from /sys/class/net/<interface>/description
+			// Get interface description from /sys/class/net/<interface>/ifalias
 			description := "Unknown"
-			descFile := fmt.Sprintf("/sys/class/net/%s/description", ifaceName)
+			descFile := fmt.Sprintf("/sys/class/net/%s/ifalias", ifaceName)
 			if descBytes, err := os.ReadFile(descFile); err == nil {
 				description = strings.TrimSpace(string(descBytes))
 			}

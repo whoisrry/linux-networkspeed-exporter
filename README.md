@@ -12,6 +12,7 @@ A Prometheus exporter that collects network interface speeds and statistics ever
 - Tracks errors, drops, and packet counts
 - IP whitelist support for secure access
 - Environment variable configuration support
+- Interface descriptions from /sys/class/net
 
 ## Installation
 
@@ -110,6 +111,29 @@ The exporter exposes the following metrics:
     - `interface`: Name of the network interface
     - `direction`: Either "receive" or "transmit"
 
+### Network Interface Information
+- `network_interface_info`: Information about network interfaces
+  - Labels:
+    - `interface`: Name of the network interface
+    - `description`: Interface description from /sys/class/net/<interface>/ifalias
+  - Value: Always 1 (gauge metric)
+  - Example: `network_interface_info{interface="eth0",description="Main Network Interface"}`
+
+## Interface Descriptions
+
+The exporter reads interface descriptions from `/sys/class/net/<interface>/ifalias`. This file contains a human-readable description of the network interface's purpose or location.
+
+To set an interface description:
+```bash
+# Set description for eth0
+echo "Main Network Interface" > /sys/class/net/eth0/ifalias
+
+# Set description for bond0
+echo "Bonded Interface for High Availability" > /sys/class/net/bond0/ifalias
+```
+
+Note: Setting interface descriptions requires root privileges.
+
 ## Example Metrics
 
 Here's an example of the metrics you might see:
@@ -130,6 +154,9 @@ network_interface_drops_total{interface="eth0",direction="transmit"} 0
 # Network packet metrics
 network_interface_packets_total{interface="eth0",direction="receive"} 565604971
 network_interface_packets_total{interface="eth0",direction="transmit"} 523496319
+
+# Network interface information
+network_interface_info{interface="eth0",description="Main Network Interface"} 1
 ```
 
 ## Prometheus Configuration
@@ -165,4 +192,9 @@ sum(network_interface_drops_total) by (interface)
 4. Total packets across all interfaces:
 ```
 sum(network_interface_packets_total) by (interface)
+```
+
+5. Get interface descriptions:
+```
+network_interface_info
 ``` 
