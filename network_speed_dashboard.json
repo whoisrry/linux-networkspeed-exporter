@@ -16,74 +16,6 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Description"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "footer": {
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
-        },
-        "showHeader": true,
-        "transpose": false
-      },
-      "pluginVersion": "10.1.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "network_interface_info{description=~\"$description\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Network Interface Information",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
             "mode": "palette-classic"
           },
           "custom": {
@@ -134,7 +66,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 4
+        "y": 0
       },
       "id": 1,
       "options": {
@@ -155,15 +87,15 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "network_interface_speed_bits{description=~\"$description\"}",
+          "expr": "network_interface_speed_bits * on(interface) group_left(description) network_interface_info{description=~\"$description\"}",
           "legendFormat": "{{interface}} - {{direction}}",
           "refId": "A"
         }
       ],
-      "title": "Network Speed - Selected Interfaces",
+      "title": "Network Speed - $description",
       "type": "timeseries",
       "repeat": "description",
-      "repeatDirection": "v"
+      "repeatDirection": "h"
     }
   ],
   "refresh": "1s",
