@@ -36,6 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_DEV }}
         with:
+          token: ${{ secrets.PAT_DEV }}
           tag_name: ${{ github.ref_name }}
           release_name: "Release ${{ github.ref_name }}"
           draft: false
@@ -46,6 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_DEV }}
         with:
+          token: ${{ secrets.PAT_DEV }}
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./vyosexporter-linux-amd64
           asset_name: vyosexporter-linux-amd64
